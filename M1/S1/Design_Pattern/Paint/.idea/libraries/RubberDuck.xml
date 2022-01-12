@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="RubberDuck">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/RubberDuck.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

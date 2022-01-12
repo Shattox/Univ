@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="RegularDuck">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/RegularDuck.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

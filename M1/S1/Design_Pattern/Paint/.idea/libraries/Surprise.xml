@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Surprise">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/Surprise.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
