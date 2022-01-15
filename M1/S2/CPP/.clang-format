@@ -1,0 +1,39 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 110
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignEscapedNewlines: Left
+
+AllowShortFunctionsOnASingleLine: InlineOnly
+BreakConstructorInitializers: BeforeComma
+AllowAllConstructorInitializersOnNextLine: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+Cpp11BracedListStyle: false
+
+AccessModifierOffset: -4
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeParens: ControlStatements
+
+AlwaysBreakTemplateDeclarations: Yes
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterStruct: false
+  AfterControlStatement: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeWhile: false
+  BeforeLambdaBody: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+
+IncludeBlocks: Regroup
+MaxEmptyLinesToKeep: 1

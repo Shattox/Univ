@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\c2-2-constructor.dir/objects.a
+C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\c2-2-constructor.dir/objects.a @CMakeFiles\c2-2-constructor.dir\objects1.rsp
+C:\msys64\mingw64\bin\x86_64-w64-mingw32-g++.exe -g -Wl,--whole-archive CMakeFiles\c2-2-constructor.dir/objects.a -Wl,--no-whole-archive -o c2-2-constructor.exe -Wl,--out-implib,libc2-2-constructor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\c2-2-constructor.dir\linklibs.rsp
