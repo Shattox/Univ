@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\c3-3-associatives.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\c3-3-associatives.dir/objects.a @CMakeFiles\c3-3-associatives.dir\objects1.rsp
-C:\msys64\mingw64\bin\x86_64-w64-mingw32-g++.exe -g -Wl,--whole-archive CMakeFiles\c3-3-associatives.dir/objects.a -Wl,--no-whole-archive -o c3-3-associatives.exe -Wl,--out-implib,libc3-3-associatives.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\c3-3-associatives.dir\linklibs.rsp

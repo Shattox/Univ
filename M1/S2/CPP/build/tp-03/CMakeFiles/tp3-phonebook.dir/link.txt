@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\tp3-phonebook.dir/objects.a
-C:\msys64\mingw64\bin\ar.exe qc CMakeFiles\tp3-phonebook.dir/objects.a @CMakeFiles\tp3-phonebook.dir\objects1.rsp
-C:\msys64\mingw64\bin\x86_64-w64-mingw32-g++.exe -g -Wl,--whole-archive CMakeFiles\tp3-phonebook.dir/objects.a -Wl,--no-whole-archive -o tp3-phonebook.exe -Wl,--out-implib,libtp3-phonebook.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\tp3-phonebook.dir\linklibs.rsp
