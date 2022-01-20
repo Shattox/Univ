@@ -1,28 +1,36 @@
 #include <iostream>
 #include <string>
 
-class Person
-{
-public:
-    const std::string& get_name() const { return _name; }
-    unsigned int       get_age() const { return _age; }
+using namespace std;
 
-    void set_name(const std::string& name) { _name = name; }
-    void set_age(unsigned int age) { _age = age; }
-
+class Person {
 private:
-    std::string  _name;
+    const string _name;
+    const string _surname;
     unsigned int _age = 0u;
+
+public:
+    Person(const string& name, const string& surname)
+        : _name { name }
+        , _surname { surname } {}
+
+    Person() {}
+
+    void wait(unsigned int year) { _age += year; }
+
+    string get_full_name() const { return _name + " " + _surname; }
+
+    int get_age() const { return _age; }
 };
 
-int main()
-{
-    Person p;
+int main() {
+    Person batman { "Batman", "Wayne" };
+    Person unknow;
 
-    p.set_name("Batman");
-    p.set_age(23);
+    batman.wait(23);
 
-    std::cout << "Person named '" << p.get_name() << "' is " << p.get_age() << " years old." << std::endl;
+    cout << "Person named '" << batman.get_full_name() << "' is " << batman.get_age() << " years old."
+         << endl;
 
     return 0;
 }
