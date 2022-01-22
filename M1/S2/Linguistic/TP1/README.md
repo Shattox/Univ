@@ -4,22 +4,26 @@
 
 ### 1.1
 
-On observe que pour un merge,
+On observe que pour le graphe **replace**, il contient pour
+chaque noeud des sous-graphes permettant de résoudre certaines
+contractions ou élisions.
+Pour le graphe **sentence** on remarque qu'il gère plus
+tout ce que est ponctuation.
 
 ### 1.2
 
 L'automate du texte ne contient pas de boucle. Il est donc acyclique.
 
-### 1.3
-
 ## Exercice 2. Recherche de motifs : expressions régulières
 
 ### 2.1
 
-| Requête |       Résultat        |
-| ------: | :-------------------: |
-|    être |         être          |
-|  <être> | suis, était, été, fut |
+|  Requête | Résultat |                       Description                        |
+| -------: | :------: | :------------------------------------------------------: |
+|   <!DIC> |  4 233   | Les mots ne figurant pas dans les dictionnaires du texte |
+| <TOKEN\> |  95 315  |         Unités lexicales trouvées dans le texte          |
+| <UPPER\> |  1 028   |              Unités lexicales en majuscule               |
+|     <.V> |  17 588  |         Les entrées ayant le code grammatical V          |
 
 On observe qu'avec les masques lexicaux, on obtient toutes les
 occurences du mot.
@@ -39,4 +43,9 @@ au token recherché.
 
 ## 3.1
 
+Avec l'expression <NB\> ou <NB\><NB\>\* on remarque que tous les
+nombres du texte ne sont pas seléctionné.
+
 ## 3.2
+
+![](horaire.png)
