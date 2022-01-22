@@ -3,6 +3,10 @@ add_executable(tp2-reminders
     Event.h
     Parsing.cpp
     Parsing.h
+    Main.cpp
+    MinuteHand.h
+    SecondHand.h
+    Clock.h
 )
 
 add_executable(tp2-histogram

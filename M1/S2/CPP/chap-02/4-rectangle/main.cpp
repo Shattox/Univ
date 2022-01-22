@@ -22,6 +22,4 @@ int main() {
 
     std::cout << s3 << std::endl;
     std::cout << s4 << std::endl;
-
-    Rectangle::s return 0;
 }
