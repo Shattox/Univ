@@ -16,6 +16,8 @@ public:
 
     int get_position() const { return _position; }
 
+    std::string get_name() const { return _name; }
+
     void set_position(int position) { _position = position; }
 
 private:

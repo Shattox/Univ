@@ -74,5 +74,7 @@ public:
         return result;
     }
 
+    std::ostream& print(std::ostream& os) const override { return os << "circle throught"; }
+
     ~Circle() = default;
 };

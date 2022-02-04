@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bdbab7a3-269e-4f92-823b-2216cc0e0e34" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Pokeball.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Pokeball.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Tests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Tests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Trainer.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../../S2/CPP/tp-03/Pokemons/Trainer.h" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
+  </component>
+  <component name="ProjectId" id="24YHxTOgRxSzrVEwf7Z5samtSRB" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../TP4" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bdbab7a3-269e-4f92-823b-2216cc0e0e34" name="Changes" comment="" />
+      <created>1643800846082</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1643800846082</updated>
+      <workItem from="1643800847304" duration="28000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

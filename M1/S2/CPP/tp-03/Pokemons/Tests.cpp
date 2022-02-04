@@ -61,7 +61,7 @@ TEST_CASE("Trainers are constructed with their name and they know the PC where t
     REQUIRE(ondine.name() == "Ondine");
 }
 
-/* TEST_CASE("Trainers start with 6 empty pokeballs") {
+ TEST_CASE("Trainers start with 6 empty pokeballs") {
     PC      pc;
     Trainer sacha { "Sacha", pc };
 
@@ -71,8 +71,8 @@ TEST_CASE("Trainers are constructed with their name and they know the PC where t
     for (const auto& pokeball : pokeballs) {
         REQUIRE(pokeball.empty() == true);
     }
-} */
-/*
+}
+
 TEST_CASE("A trainer can catch a pokemon")
 {
     PC      pc;
@@ -114,7 +114,7 @@ TEST_CASE("A trainer can catch a pokemon")
         REQUIRE(pc.pokemons()[0]->name() == "Dracaufeu");
     }
 }
-
+/*
 TEST_CASE("A Pokemon knows its trainer")
 {
     auto bulbizarre = std::make_unique<Pokemon>("Bulbizarre");
