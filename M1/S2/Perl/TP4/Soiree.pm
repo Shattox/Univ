@@ -23,6 +23,8 @@ sub fete {
 
     foreach my $p ($self->potes()) {
         print($p->lastName()."\n");
+        $self->Fetard->boire();
+        $self->delirer();
     }
 }
 
