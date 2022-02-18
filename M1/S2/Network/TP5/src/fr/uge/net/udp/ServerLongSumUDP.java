@@ -15,7 +15,6 @@ public class ServerLongSumUDP {
         private final BitSet bitSet;
         private long result;
         private int counter;
-        /*private final long lifeCycle;*/
 
         public Data(long totalOper) {
             if (totalOper < 0) {
@@ -25,7 +24,6 @@ public class ServerLongSumUDP {
             this.counter = 0;
             this.totalOper = totalOper;
             this.bitSet = new BitSet((int) totalOper);
-            /*this.lifeCycle = System.currentTimeMillis();*/
         }
 
         public void update(int idPosOper, long opValue) {
@@ -73,22 +71,10 @@ public class ServerLongSumUDP {
                     var totalOper = buffer.getLong();
                     var opValue = buffer.getLong();
 
-                    var data = new Data(totalOper);
-                    data.update(idPosOper, opValue);
-
                     // OP
-                    if (!container.containsKey(sender)) {
-                        var map = new HashMap<Long, Data>();
-                        map.put(sessionId, data);
-                        container.put(sender, map);
-                    } else {
-                        var client = container.get(sender);
-                        if (client.containsKey(sessionId)) {
-                            client.get(sessionId).update(idPosOper, opValue);
-                        } else {
-                            client.put(sessionId, data);
-                        }
-                    }
+                    var key = container.computeIfAbsent(sender, __ -> new HashMap<>());
+                    var data = key.computeIfAbsent(sessionId, __ -> new Data(totalOper));
+                    data.update(idPosOper, opValue);
 
                     // ACK
                     buffer.clear();
@@ -103,15 +89,6 @@ public class ServerLongSumUDP {
                         dc.send(buffer, sender);
                     }
                 }
-                // FONCTIONNE PAS
-                /*if (type == 4 || (System.currentTimeMillis() - container.get(sender).get(sessionId).lifeCycle) >= 400) {
-                    // CLEAN
-                    container.get(sender).remove(sessionId);
-                    // ACK CLEAN
-                    buffer.clear();
-                    buffer.put((byte) 5).putLong(sessionId).flip();
-                    dc.send(buffer, sender);
-                }*/
             }
         } finally {
             dc.close();
