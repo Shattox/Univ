@@ -13,7 +13,7 @@
 static int WWIDTH=512, WHEIGHT=512;
 static G3Xpoint P[NBP][NBM];
 
-static void sphere(void) {
+static void square(void) {
     double phi_p = PI / NBP;
     double theta_m = (2 * PI) / NBM;
     
@@ -31,18 +31,7 @@ static void sphere(void) {
 
 /* la fonction d'initialisation : appelée 1 seule fois, au début */
 static void init(void) {
-    /* glBegin(GL_QUADS);
-        for (int p = 0; p < NBP - step; p += step) {
-            for (int m = 0; m < NBM - step; m += step) {
-                g3x_Vertex3dv(P[p][m]);
-                g3x_Vertex3dv(P[p][m + step]);
-                g3x_Vertex3dv(P[p + step][m + step]);
-                g3x_Vertex3dv(P[p + step][m]);
-                // fermer le bandeau
-            }
-        }
-    glEnd(); */
-    sphere();
+    square();
 }
 
 /* la fonction de contrôle : appelée 1 seule fois, juste après <init> */
@@ -53,9 +42,9 @@ static void ctrl(void)
 /* la fonction de dessin : appelée en boucle */
 static void draw(void)
 {
-    int step = 15;
+    int step = 5;
     glPointSize(4);
-    glBegin(GL_LINES);
+    glBegin(GL_POINTS);
         for (int p = 0; p < NBP - step; p += step) {
             for (int m = 0; m < NBM - 1; m += step) {
                g3x_Normal3dv(P[p][m]);
