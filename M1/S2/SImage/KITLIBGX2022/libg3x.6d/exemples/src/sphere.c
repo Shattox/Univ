@@ -53,15 +53,27 @@ static void ctrl(void)
 /* la fonction de dessin : appelée en boucle */
 static void draw(void)
 {
-    int step = 10;
+    int step = 15;
     glPointSize(4);
-    glBegin(GL_POINTS);
+    glBegin(GL_LINES);
         for (int p = 0; p < NBP - step; p += step) {
-            for (int m = 0; m < NBM - step; m += step) {
+            for (int m = 0; m < NBM - 1; m += step) {
                g3x_Normal3dv(P[p][m]);
-               g3x_Vertex3dv(P[p][m]);
+               g3x_Vertex3dv(P[p][m + step]);
             }
+            g3x_Vertex3dv(P[p][NBM - 1]);
+            g3x_Vertex3dv(P[p][0]);
         }
+        for (int m = 0; m <= NBM - step; m += step) //remplacer 1 par le ppas
+    {
+        for (int p = 0; p < NBP - 1; p += 1) //remplacer 1 par le mpas
+        {
+            //ici aussi
+            g3x_Vertex3dv(P[p][m]);
+            g3x_Vertex3dv(P[p + 1][m]);
+        }
+    }
+
     glEnd();
 }
 
