@@ -36,7 +36,7 @@ public class ClientIdUpperCaseUDPOneByOne {
     private final Selector selector;
     private final SelectionKey uniqueKey;
     private final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-    private long id = 0L;
+    private int id = 0;
     private long lastSend = 0L;
 
     // TODO add new fields
@@ -179,7 +179,7 @@ public class ClientIdUpperCaseUDPOneByOne {
     private void doWrite() throws IOException {
         // TODO
         buffer.clear();
-        buffer.putLong(id).put(UTF8.encode(lines.get((int) id))).flip();
+        buffer.putLong(id).put(UTF8.encode(lines.get(id))).flip();
         dc.send(buffer, serverAddress);
         if (buffer.hasRemaining()) {
             logger.info("Any packets sent");
