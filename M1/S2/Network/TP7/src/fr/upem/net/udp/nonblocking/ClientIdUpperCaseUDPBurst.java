@@ -11,9 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static java.nio.file.StandardOpenOption.*;
@@ -25,17 +23,20 @@ public class ClientIdUpperCaseUDPBurst {
 
     private enum State {
         SENDING, RECEIVING, FINISHED
-    };
+    }
 
     private final List<String> lines;
-    private final List<String> upperCaseLines = new ArrayList<>();
+    private final String[] upperCaseLines;
     private final long timeout;
     private final InetSocketAddress serverAddress;
     private final DatagramChannel dc;
     private final Selector selector;
     private final SelectionKey uniqueKey;
     private final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-    private long id = 0L;
+    private int id = 0;
+    private long lastSend = 0L;
+    private final BitSet bitSet;
+    private int counter = 0;
 
     // TODO add new fields
 
@@ -46,7 +47,7 @@ public class ClientIdUpperCaseUDPBurst {
     }
 
     private ClientIdUpperCaseUDPBurst(List<String> lines, long timeout, InetSocketAddress serverAddress,
-                                         DatagramChannel dc, Selector selector, SelectionKey uniqueKey){
+                                      DatagramChannel dc, Selector selector, SelectionKey uniqueKey) {
         this.lines = lines;
         this.timeout = timeout;
         this.serverAddress = serverAddress;
@@ -54,10 +55,12 @@ public class ClientIdUpperCaseUDPBurst {
         this.selector = selector;
         this.uniqueKey = uniqueKey;
         this.state = State.SENDING;
+        this.upperCaseLines = new String[lines.size()];
+        this.bitSet = new BitSet(lines.size());
     }
 
     public static ClientIdUpperCaseUDPBurst create(String inFilename, long timeout,
-                                                      InetSocketAddress serverAddress) throws IOException {
+                                                   InetSocketAddress serverAddress) throws IOException {
         Objects.requireNonNull(inFilename);
         Objects.requireNonNull(serverAddress);
         Objects.checkIndex(timeout, Long.MAX_VALUE);
@@ -98,7 +101,7 @@ public class ClientIdUpperCaseUDPBurst {
                     throw tunneled.getCause();
                 }
             }
-            return upperCaseLines;
+            return Arrays.asList(upperCaseLines);
         } finally {
             dc.close();
         }
@@ -125,7 +128,21 @@ public class ClientIdUpperCaseUDPBurst {
 
     private long updateInterestOps() {
         // TODO
-        return 0;
+        var time = lastSend + timeout - System.currentTimeMillis();
+        if (state == State.RECEIVING) {
+            id = 0;
+            if (time <= 0) {
+                state = State.SENDING;
+            } else {
+                uniqueKey.interestOps(SelectionKey.OP_READ);
+                return time;
+            }
+        }
+        if (state == State.SENDING) {
+            uniqueKey.interestOps(SelectionKey.OP_WRITE);
+            return 0;
+        }
+        return time;
     }
 
     private boolean isFinished() {
@@ -140,6 +157,23 @@ public class ClientIdUpperCaseUDPBurst {
 
     private void doRead() throws IOException {
         // TODO
+        buffer.clear();
+        var sender = (InetSocketAddress) dc.receive(buffer);
+        if (sender == null) {
+            logger.info("Any packets received");
+            return;
+        }
+        buffer.flip();
+        var receivedId = (int) buffer.getLong();
+        if (!bitSet.get(receivedId)) {
+            state = State.SENDING;
+            upperCaseLines[receivedId] = UTF8.decode(buffer).toString();
+            bitSet.set(receivedId);
+            counter++;
+            if (counter == lines.size()) {
+                state = State.FINISHED;
+            }
+        }
     }
 
     /**
@@ -150,5 +184,20 @@ public class ClientIdUpperCaseUDPBurst {
 
     private void doWrite() throws IOException {
         // TODO
+        if (!bitSet.get(id)) {
+            buffer.clear();
+            buffer.putLong(id).put(UTF8.encode(lines.get(id))).flip();
+            dc.send(buffer, serverAddress);
+            if (buffer.hasRemaining()) {
+                logger.info("Any packets sent");
+                return;
+            }
+            lastSend = System.currentTimeMillis();
+            state = State.RECEIVING;
+        }
+        id++;
+        if (id == lines.size()) {
+            state = State.RECEIVING;
+        }
     }
 }
