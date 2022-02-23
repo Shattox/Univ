@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="TP6">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ClientTestEchoMultiPort.jar!/" />
+      <root url="jar://$PROJECT_DIR$/NetcatUDP.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
