@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="TP7">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/ServerIdUpperCaseUDPTestTimeout.jar!/" />
+      <root url="jar://$PROJECT_DIR$/UDPProxy.jar!/" />
+      <root url="jar://$PROJECT_DIR$/ServerIdUpperCaseUDP.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
