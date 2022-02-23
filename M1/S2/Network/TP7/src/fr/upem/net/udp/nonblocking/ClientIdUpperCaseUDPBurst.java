@@ -193,7 +193,6 @@ public class ClientIdUpperCaseUDPBurst {
                 return;
             }
             lastSend = System.currentTimeMillis();
-            state = State.RECEIVING;
         }
         id++;
         if (id == lines.size()) {

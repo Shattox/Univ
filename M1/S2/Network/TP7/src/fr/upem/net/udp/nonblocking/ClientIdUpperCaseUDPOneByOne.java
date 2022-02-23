@@ -124,7 +124,6 @@ public class ClientIdUpperCaseUDPOneByOne {
      *
      * @return the timeout for the next select (0 means no timeout)
      */
-
     private long updateInterestOps() {
         // TODO
         var time = lastSend + timeout - System.currentTimeMillis();
@@ -152,7 +151,6 @@ public class ClientIdUpperCaseUDPOneByOne {
      *
      * @throws IOException IOException
      */
-
     private void doRead() throws IOException {
         // TODO
         buffer.clear();
@@ -178,7 +176,6 @@ public class ClientIdUpperCaseUDPOneByOne {
      *
      * @throws IOException IOException
      */
-
     private void doWrite() throws IOException {
         // TODO
         buffer.clear();
@@ -190,6 +187,5 @@ public class ClientIdUpperCaseUDPOneByOne {
         }
         lastSend = System.currentTimeMillis();
         state = State.RECEIVING;
-        // flip le buffer send.
     }
 }
