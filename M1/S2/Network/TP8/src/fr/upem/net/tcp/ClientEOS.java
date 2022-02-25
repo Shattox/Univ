@@ -23,12 +23,12 @@ public class ClientEOS {
      * - stores the bufferSize first bytes of server response 
      * - return the corresponding string in UTF8
      *
-     * @param request
-     * @param server
-     * @param bufferSize
+     * @param request request
+     * @param server server
+     * @param bufferSize bufferSize
      * @return the UTF8 string corresponding to bufferSize first bytes of server
      *         response
-     * @throws IOException
+     * @throws IOException IOException
      */
 
     public static String getFixedSizeResponse(String request, SocketAddress server, int bufferSize) throws IOException {
@@ -40,14 +40,8 @@ public class ClientEOS {
         sc.write(buffer);
         sc.shutdownOutput();
         buffer.clear();
-        var read = sc.read(buffer);
-        while (buffer.hasRemaining()) {
-            read = sc.read(buffer);
-            if (read == -1) {
-                logger.info("Connection closed for reading");
-                break;
-            }
-        }
+        readFully(sc,buffer);
+        sc.close();
         buffer.flip();
         return UTF8_CHARSET.decode(buffer).toString();
     }
@@ -60,10 +54,10 @@ public class ClientEOS {
      * - reads and stores all bytes from server until read-channel is closed 
      * - return the corresponding string in UTF8
      *
-     * @param request
-     * @param server
+     * @param request request
+     * @param server server
      * @return the UTF8 string corresponding the full response of the server
-     * @throws IOException
+     * @throws IOException IOException
      */
 
     public static String getUnboundedResponse(String request, SocketAddress server) throws IOException {
@@ -74,13 +68,9 @@ public class ClientEOS {
         buffer.put(UTF8_CHARSET.encode(request)).flip();
         sc.write(buffer);
         sc.shutdownOutput();
-        var read = sc.read(buffer);
 
-        while (read != -1) {
-            if (!buffer.hasRemaining()) {
-                buffer = ByteBuffer.allocate(buffer.capacity() * 2);
-            }
-            read = sc.read(buffer);
+        while (readFully(sc, buffer)) {
+            buffer = ByteBuffer.allocate(buffer.capacity() * 2);
         }
         buffer.flip();
         return UTF8_CHARSET.decode(buffer).toString();
@@ -89,20 +79,25 @@ public class ClientEOS {
     /**
      * Fill the workspace with the Bytebuffer with bytes read from sc.
      *
-     * @param sc
-     * @param buffer
+     * @param sc sc
+     * @param buffer buffer
      * @return false if read returned -1 at some point and true otherwise
-     * @throws IOException
+     * @throws IOException IOException
      */
     static boolean readFully(SocketChannel sc, ByteBuffer buffer) throws IOException {
         // TODO
-        var read = sc.read(buffer);
-        return read != -1;
+        while (buffer.hasRemaining()) {
+            if (sc.read(buffer) == -1) {
+                logger.info("Connection closed for reading");
+                return false;
+            }
+        }
+        return true;
     }
 
     public static void main(String[] args) throws IOException {
         var google = new InetSocketAddress("www.google.fr", 80);
-        // System.out.println(getFixedSizeResponse("GET / HTTP/1.1\r\nHost: www.google.fr\r\n\r\n", google, 512));
+        System.out.println(getFixedSizeResponse("GET / HTTP/1.1\r\nHost: www.google.fr\r\n\r\n", google, 512));
         System.out.println(getUnboundedResponse("GET / HTTP/1.1\r\nHost: www.google.fr\r\n\r\n", google));
     }
 }
