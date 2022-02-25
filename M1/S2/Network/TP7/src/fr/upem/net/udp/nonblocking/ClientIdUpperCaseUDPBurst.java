@@ -33,11 +33,10 @@ public class ClientIdUpperCaseUDPBurst {
     private final Selector selector;
     private final SelectionKey uniqueKey;
     private final ByteBuffer buffer = ByteBuffer.allocate(BUFFER_SIZE);
-    private int id = 0;
+    private int idLine = 0;
     private long lastSend = 0L;
-    private final BitSet bitSet;
-    private int counter = 0;
-
+    private final AnswersLog answersLog;
+    private List<Integer> missingAnswers;
     // TODO add new fields
 
     private State state;
@@ -56,7 +55,8 @@ public class ClientIdUpperCaseUDPBurst {
         this.uniqueKey = uniqueKey;
         this.state = State.SENDING;
         this.upperCaseLines = new String[lines.size()];
-        this.bitSet = new BitSet(lines.size());
+        this.answersLog = new AnswersLog(lines.size());
+        this.missingAnswers = answersLog.missingAnswer();
     }
 
     public static ClientIdUpperCaseUDPBurst create(String inFilename, long timeout,
@@ -130,7 +130,8 @@ public class ClientIdUpperCaseUDPBurst {
         // TODO
         var time = lastSend + timeout - System.currentTimeMillis();
         if (state == State.RECEIVING) {
-            id = 0;
+            idLine = 0;
+            missingAnswers = answersLog.missingAnswer();
             if (time <= 0) {
                 state = State.SENDING;
             } else {
@@ -164,15 +165,18 @@ public class ClientIdUpperCaseUDPBurst {
             return;
         }
         buffer.flip();
+        if (buffer.remaining() < Long.BYTES) {
+            return;
+        }
         var receivedId = (int) buffer.getLong();
-        if (!bitSet.get(receivedId)) {
-            state = State.SENDING;
-            upperCaseLines[receivedId] = UTF8.decode(buffer).toString();
-            bitSet.set(receivedId);
-            counter++;
-            if (counter == lines.size()) {
-                state = State.FINISHED;
-            }
+        if (answersLog.bitSet.get(receivedId)) {
+            return;
+        }
+        state = State.SENDING;
+        upperCaseLines[receivedId] = UTF8.decode(buffer).toString();
+        answersLog.update(receivedId);
+        if (answersLog.isFinished()) {
+            state = State.FINISHED;
         }
     }
 
@@ -184,19 +188,49 @@ public class ClientIdUpperCaseUDPBurst {
 
     private void doWrite() throws IOException {
         // TODO
-        if (!bitSet.get(id)) {
-            buffer.clear();
-            buffer.putLong(id).put(UTF8.encode(lines.get(id))).flip();
-            dc.send(buffer, serverAddress);
-            if (buffer.hasRemaining()) {
-                logger.info("Any packets sent");
-                return;
-            }
-            lastSend = System.currentTimeMillis();
+        var id = missingAnswers.get(idLine);
+        buffer.clear();
+        buffer.putLong(id).put(UTF8.encode(lines.get(id))).flip();
+        dc.send(buffer, serverAddress);
+        if (buffer.hasRemaining()) {
+            logger.info("Any packets sent");
+            return;
         }
-        id++;
-        if (id == lines.size()) {
+        idLine++;
+        lastSend = System.currentTimeMillis();
+        if (idLine == answersLog.missingAnswer().size()) {
             state = State.RECEIVING;
+        }
+    }
+
+    public static class AnswersLog {
+        private final BitSet bitSet;
+        private int counter;
+        private final int nbLines;
+
+        public AnswersLog(int nbLines) {
+            this.nbLines = nbLines;
+            this.bitSet = new BitSet(nbLines);
+            this.counter = 0;
+        }
+
+        public void update(int index) {
+            bitSet.set(index);
+            counter++;
+        }
+
+        public List<Integer> missingAnswer() {
+            var missingAnswer = new ArrayList<Integer>();
+            for (int i = 0; i < nbLines; i++) {
+                if (!bitSet.get(i)) {
+                    missingAnswer.add(i);
+                }
+            }
+            return missingAnswer;
+        }
+
+        public boolean isFinished() {
+            return counter == nbLines;
         }
     }
 }
