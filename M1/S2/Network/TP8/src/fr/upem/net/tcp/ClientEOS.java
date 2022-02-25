@@ -69,7 +69,7 @@ public class ClientEOS {
         sc.write(buffer);
         sc.shutdownOutput();
 
-        while (readFully(sc, buffer)) {
+        while (!readFully(sc, buffer)) {
             buffer = ByteBuffer.allocate(buffer.capacity() * 2);
         }
         buffer.flip();
@@ -88,11 +88,10 @@ public class ClientEOS {
         // TODO
         while (buffer.hasRemaining()) {
             if (sc.read(buffer) == -1) {
-                logger.info("Connection closed for reading");
-                return false;
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public static void main(String[] args) throws IOException {

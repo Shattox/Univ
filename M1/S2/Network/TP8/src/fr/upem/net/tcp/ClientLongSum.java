@@ -2,11 +2,13 @@ package fr.upem.net.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.logging.Logger;
 
 public class ClientLongSum {
+    private static final int BUFFER_SIZE = 1024;
 
     public static final Logger logger = Logger.getLogger(ClientLongSum.class.getName());
 
@@ -25,16 +27,39 @@ public class ClientLongSum {
      * returns Optional.empty if the protocol is not followed by the server but no
      * IOException is thrown
      *
-     * @param sc
-     * @param list
-     * @return
-     * @throws IOException
+     * @param sc sc
+     * @param list list
+     * @return empty
+     * @throws IOException IOException
      */
     private static Optional<Long> requestSumForList(SocketChannel sc, List<Long> list) throws IOException {
-
         // TODO
+        var buffer = ByteBuffer.allocate(BUFFER_SIZE);
+        buffer.putInt(list.size());
 
-        return null;
+        for (var value: list) {
+            buffer.putLong(value);
+        }
+        buffer.flip();
+        sc.write(buffer);
+        buffer.clear();
+
+        if (readFully(sc, buffer)) {
+            buffer.flip();
+            return Optional.of(buffer.getLong());
+        }
+        return Optional.empty();
+    }
+
+    static boolean readFully(SocketChannel sc, ByteBuffer buffer) throws IOException {
+        // TODO
+        while (buffer.hasRemaining()) {
+            sc.read(buffer);
+            if ((buffer.capacity() - buffer.remaining()) == Long.BYTES) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) throws IOException {

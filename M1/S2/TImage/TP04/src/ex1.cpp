@@ -19,7 +19,7 @@ void callBackKeyboard(int event, int x, int y, int flags, void *userdata) {
 }
 
 void Filtrage(const cv::Mat& src, cv::Mat& dst, int filtreType, int argument) {
-
+    
 }
 
 
@@ -42,13 +42,14 @@ int main(int argc, char const *argv[]) {
     cv::namedWindow("image", 1);
     cv::setMouseCallback("image", callBackKeyboard, NULL);
 
-
+    cv::Mat newImage;
     bool loopOn = true;
 
     while (loopOn) {
 
         cv::imshow("image", image);
-        extrapolation(image, 3);
+        Filtrage(image, newImage, 0, 0);
+        cv::imshow("new image", newImage);
 
         int key = cv::waitKey(500) % 256;
         if (key == 27 || key == 'q')
