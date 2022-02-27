@@ -3,8 +3,6 @@ package fr.upem.net.udp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.AsynchronousCloseException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.DatagramChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -21,12 +19,12 @@ public class ClientIdUpperCaseUDPBurst {
     private static final int BUFFER_SIZE = 1024;
     private final List<String> lines;
     private final int nbLines;
-    private final String[] upperCaseLines; //
+    private final String[] upperCaseLines;
     private final int timeout;
     private final String outFilename;
     private final InetSocketAddress serverAddress;
     private final DatagramChannel dc;
-    private final AnswersLog answersLog;         // Thread-safe structure keeping track of missing responses
+    private final AnswersLog answersLog; // Thread-safe structure keeping track of missing responses
 
     public static void usage() {
         System.out.println("Usage : ClientIdUpperCaseUDPBurst in-filename out-filename timeout host port ");
@@ -41,29 +39,22 @@ public class ClientIdUpperCaseUDPBurst {
         this.dc = DatagramChannel.open();
         dc.bind(null);
         this.upperCaseLines = new String[nbLines];
-        this.answersLog = new AnswersLog(nbLines); // TODO
+        this.answersLog = new AnswersLog(nbLines);
     }
 
     private void senderThreadRun() {
-        // TODO : body of the sender thread
         try {
             var buffer = ByteBuffer.allocate(BUFFER_SIZE);
-            long lastSend = 0L;
-            while (!Thread.interrupted()) {
-                var currentTime = System.currentTimeMillis();
-                if (currentTime - lastSend > timeout) {
-
-                    for (var i = 0; i < nbLines; i++) {
-                        if (!answersLog.getIndex(i)) {
-                            buffer.putLong(i).put(UTF8.encode(lines.get(i)));
-                            buffer.flip();
-                            dc.send(buffer, serverAddress);
-                            buffer.clear();
-                        }
-                        lastSend = currentTime;
-                    }
+            while (true) {
+                for (var id : answersLog.missingAnswer()) {
+                    buffer.putLong(id).put(UTF8.encode(lines.get(id))).flip();
+                    dc.send(buffer, serverAddress);
+                    buffer.clear();
                 }
+                Thread.sleep(timeout);
             }
+        } catch (InterruptedException e) {
+            logger.info("InterruptedException" + e);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "IOException" + e);
         }
@@ -74,30 +65,18 @@ public class ClientIdUpperCaseUDPBurst {
             Thread senderThread = new Thread(this::senderThreadRun);
             senderThread.start();
 
-            // TODO : body of the receiver thread
             var buffer = ByteBuffer.allocate(BUFFER_SIZE);
 
-            while (!answersLog.allTrue()) {
-                try {
-                    logger.info("current upperCaseList -> " + Arrays.stream(upperCaseLines).toList());
-                    buffer.clear();
-                    dc.receive(buffer);
-                    buffer.flip();
-                    if (buffer.remaining() < Integer.BYTES) {
-                        continue;
-                    }
-                    var id = (int) buffer.getLong();
-                    if (id >= 0 && !answersLog.getIndex(id)) {
-                        upperCaseLines[id] = UTF8.decode(buffer).toString();
-                        answersLog.setIndex(id);
-                    }
-                } catch (AsynchronousCloseException e) {
-                    logger.info("AsynchronousCloseException " + e);
-                } catch (ClosedChannelException e) {
-                    logger.info("ClosedChannelException " + e);
-                } catch (IOException e) {
-                    logger.log(Level.SEVERE, "IOException", e);
+            while (!answersLog.isFinished()) {
+                buffer.clear();
+                dc.receive(buffer);
+                buffer.flip();
+                if (buffer.remaining() < Long.BYTES) {
+                    continue;
                 }
+                var id = (int) buffer.getLong();
+                upperCaseLines[id] = UTF8.decode(buffer).toString();
+                answersLog.update(id);
             }
             senderThread.interrupt();
             Files.write(Paths.get(outFilename), Arrays.asList(upperCaseLines), UTF8,
@@ -134,27 +113,38 @@ public class ClientIdUpperCaseUDPBurst {
         // TODO Thread-safe class handling the information about missing lines
         private final BitSet bitSet;
         private final int nbLines;
+        private int counter;
 
         public AnswersLog(int nbLines) {
             this.bitSet = new BitSet(nbLines);
             this.nbLines = nbLines;
+            this.counter = 0;
         }
 
-        public boolean getIndex(int index) {
+        public boolean isFinished() {
             synchronized (bitSet) {
-                return bitSet.get(index);
+                return counter == nbLines;
             }
         }
 
-        public void setIndex(int index) {
+        public void update(int index) {
             synchronized (bitSet) {
-                bitSet.set(index);
+                if (!bitSet.get(index)) {
+                    bitSet.set(index);
+                    counter++;
+                }
             }
         }
 
-        public boolean allTrue() {
+        public List<Integer> missingAnswer() {
             synchronized (bitSet) {
-                return bitSet.cardinality() == nbLines;
+                var missingAnswer = new ArrayList<Integer>();
+                for (int i = 0; i < nbLines; i++) {
+                    if (!bitSet.get(i)) {
+                        missingAnswer.add(i);
+                    }
+                }
+                return missingAnswer;
             }
         }
     }
