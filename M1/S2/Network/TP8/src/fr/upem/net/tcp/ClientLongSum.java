@@ -3,6 +3,7 @@ package fr.upem.net.tcp;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.logging.Logger;
@@ -54,9 +55,13 @@ public class ClientLongSum {
     static boolean readFully(SocketChannel sc, ByteBuffer buffer) throws IOException {
         // TODO
         while (buffer.hasRemaining()) {
-            sc.read(buffer);
-            if ((buffer.capacity() - buffer.remaining()) == Long.BYTES) {
-                return true;
+            try {
+                sc.read(buffer);
+                if ((buffer.capacity() - buffer.remaining()) == Long.BYTES) {
+                    return true;
+                }
+            } catch (NotYetConnectedException e) {
+                logger.info("Connection with server lost.");
             }
         }
         return false;

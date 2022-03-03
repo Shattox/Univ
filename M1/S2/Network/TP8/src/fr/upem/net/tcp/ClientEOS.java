@@ -73,6 +73,7 @@ public class ClientEOS {
             buffer = ByteBuffer.allocate(buffer.capacity() * 2);
         }
         buffer.flip();
+        sc.close();
         return UTF8_CHARSET.decode(buffer).toString();
     }
 
