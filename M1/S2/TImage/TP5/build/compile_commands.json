@@ -1,0 +1,13 @@
+[
+{
+  "directory": "/home/steve/Univ/M1/S2/TImage/TP5/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9   -isystem /usr/include/opencv4  -Wall -g -O2 -std=c++14 -g   -o CMakeFiles/fourier.dir/src/fourierTransform.cpp.o -c /home/steve/Univ/M1/S2/TImage/TP5/src/fourierTransform.cpp",
+  "file": "/home/steve/Univ/M1/S2/TImage/TP5/src/fourierTransform.cpp"
+},
+
+{
+  "directory": "/home/steve/Univ/M1/S2/TImage/TP5/build",
+  "command": "/bin/x86_64-linux-gnu-g++-9   -isystem /usr/include/opencv4  -Wall -g -O2 -std=c++14 -g   -o CMakeFiles/fourier.dir/src/tp05_ex01.cpp.o -c /home/steve/Univ/M1/S2/TImage/TP5/src/tp05_ex01.cpp",
+  "file": "/home/steve/Univ/M1/S2/TImage/TP5/src/tp05_ex01.cpp"
+}
+]
