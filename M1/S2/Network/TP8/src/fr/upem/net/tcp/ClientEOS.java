@@ -40,7 +40,7 @@ public class ClientEOS {
         sc.write(buffer);
         sc.shutdownOutput();
         buffer.clear();
-        readFully(sc,buffer);
+        readFully(sc, buffer);
         sc.close();
         buffer.flip();
         return UTF8_CHARSET.decode(buffer).toString();
@@ -69,8 +69,11 @@ public class ClientEOS {
         sc.write(buffer);
         sc.shutdownOutput();
 
-        while (!readFully(sc, buffer)) {
-            buffer = ByteBuffer.allocate(buffer.capacity() * 2);
+        while (readFully(sc, buffer)) {
+            var newBuffer = ByteBuffer.allocate(buffer.capacity() * 2);
+            buffer.flip();
+            newBuffer.put(buffer);
+            buffer = newBuffer;
         }
         buffer.flip();
         sc.close();
@@ -89,10 +92,10 @@ public class ClientEOS {
         // TODO
         while (buffer.hasRemaining()) {
             if (sc.read(buffer) == -1) {
-                return true;
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public static void main(String[] args) throws IOException {

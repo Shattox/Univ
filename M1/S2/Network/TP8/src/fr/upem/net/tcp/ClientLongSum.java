@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.NotYetConnectedException;
 import java.nio.channels.SocketChannel;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClientLongSum {
@@ -24,30 +25,32 @@ public class ClientLongSum {
     /**
      * Write all the longs in list in BigEndian on the server and read the long sent
      * by the server and returns it
-     *
+     * <p>
      * returns Optional.empty if the protocol is not followed by the server but no
      * IOException is thrown
      *
-     * @param sc sc
+     * @param sc   sc
      * @param list list
      * @return empty
      * @throws IOException IOException
      */
     private static Optional<Long> requestSumForList(SocketChannel sc, List<Long> list) throws IOException {
         // TODO
-        var buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        buffer.putInt(list.size());
+        var sendBuffer = ByteBuffer.allocate(BUFFER_SIZE);
 
-        for (var value: list) {
-            buffer.putLong(value);
+        // Write
+        sendBuffer.putInt(list.size());
+        for (var value : list) {
+            sendBuffer.putLong(value);
         }
-        buffer.flip();
-        sc.write(buffer);
-        buffer.clear();
+        sendBuffer.flip();
+        sc.write(sendBuffer);
 
-        if (readFully(sc, buffer)) {
-            buffer.flip();
-            return Optional.of(buffer.getLong());
+        // Read
+        var receivedBuffer = ByteBuffer.allocate(Long.BYTES);
+        if (readFully(sc, receivedBuffer)) {
+            receivedBuffer.flip();
+            return Optional.of(receivedBuffer.getLong());
         }
         return Optional.empty();
     }
@@ -55,16 +58,11 @@ public class ClientLongSum {
     static boolean readFully(SocketChannel sc, ByteBuffer buffer) throws IOException {
         // TODO
         while (buffer.hasRemaining()) {
-            try {
-                sc.read(buffer);
-                if ((buffer.capacity() - buffer.remaining()) == Long.BYTES) {
-                    return true;
-                }
-            } catch (NotYetConnectedException e) {
-                logger.info("Connection with server lost.");
+            if (sc.read(buffer) == -1) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public static void main(String[] args) throws IOException {
@@ -72,9 +70,8 @@ public class ClientLongSum {
         try (var sc = SocketChannel.open(server)) {
             for (var i = 0; i < 5; i++) {
                 var list = randomLongList(50);
-
                 var sum = requestSumForList(sc, list);
-                if (!sum.isPresent()) {
+                if (sum.isEmpty()) {
                     logger.warning("Connection with server lost.");
                     return;
                 }
