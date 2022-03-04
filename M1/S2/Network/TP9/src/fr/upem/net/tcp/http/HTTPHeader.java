@@ -16,8 +16,7 @@ public class HTTPHeader {
      */
 
     private static final String[] LIST_SUPPORTED_VERSIONS = new String[] { "HTTP/1.0", "HTTP/1.1", "HTTP/2.0" };
-    public static final Set<String> SUPPORTED_VERSIONS = Collections
-            .unmodifiableSet(new HashSet<>(Arrays.asList(LIST_SUPPORTED_VERSIONS)));
+    public static final Set<String> SUPPORTED_VERSIONS = Set.of(LIST_SUPPORTED_VERSIONS);
 
     private final String response;
     private final String version;
@@ -39,7 +38,7 @@ public class HTTPHeader {
         ensure(HTTPHeader.SUPPORTED_VERSIONS.contains(version), "Unsupported version in response:\n" + response);
         var code = 0;
         try {
-            code = Integer.valueOf(tokens[1]);
+            code = Integer.parseInt(tokens[1]);
             ensure(code >= 100 && code < 600, "Invalid code in response:\n" + response);
         } catch (NumberFormatException e) {
             ensure(false, "Invalid response:\n" + response);
@@ -78,7 +77,7 @@ public class HTTPHeader {
             return -1;
         }
         try {
-            return Integer.valueOf(contentString.trim());
+            return Integer.parseInt(contentString.trim());
         } catch (NumberFormatException e) {
             throw new HTTPException("Invalid Content-Length field value :\n" + contentString);
         }

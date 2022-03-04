@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 public class HTTPReader {
 
@@ -17,7 +18,6 @@ public class HTTPReader {
         this.sc = sc;
         this.buffer = buffer;
     }
-
 
     /**
      * @return The ASCII string terminated by CRLF without the CRLF
@@ -65,8 +65,15 @@ public class HTTPReader {
      *                     could be read or if the header is ill-formed
      */
     public HTTPHeader readHeader() throws IOException {
-        // TODO
-        return null;
+        var response = readLineCRLF();
+        var fields = new HashMap<String, String>();
+        String line;
+
+        while (!(line = readLineCRLF()).isEmpty()) {
+            var token = line.split(":");
+            fields.merge(token[0], token[1], (oldAttr, newAttr) -> oldAttr + ";" + newAttr);
+        }
+        return HTTPHeader.create(response, fields);
     }
 
     /**
@@ -80,8 +87,30 @@ public class HTTPReader {
      *                     bytes could be read
      */
     public ByteBuffer readBytes(int size) throws IOException {
-        // TODO
-        return null;
+        buffer.flip();
+
+        try {
+            var newBuffer = ByteBuffer.allocate(size);
+
+            for (; ; ) {
+                if (!buffer.hasRemaining()) {
+                    buffer.clear();
+                    if (sc.read(buffer) == -1) {
+                        throw new HTTPException();
+                    }
+                    buffer.flip();
+                } else {
+                    while (buffer.hasRemaining()) {
+                        newBuffer.put(buffer.get());
+                        if (!newBuffer.hasRemaining()) {
+                            return newBuffer;
+                        }
+                    }
+                }
+            }
+        } finally {
+            buffer.compact();
+        }
     }
 
     /**
@@ -96,16 +125,16 @@ public class HTTPReader {
     }
 
     public static void main(String[] args) throws IOException {
-        var charsetASCII = Charset.forName("ASCII");
+        var charsetASCII = StandardCharsets.US_ASCII;
         var request = "GET / HTTP/1.1\r\n" + "Host: www.w3.org\r\n" + "\r\n";
         var sc = SocketChannel.open();
         sc.connect(new InetSocketAddress("www.w3.org", 80));
         sc.write(charsetASCII.encode(request));
         var buffer = ByteBuffer.allocate(50);
         var reader = new HTTPReader(sc, buffer);
+        /*System.out.println(reader.readLineCRLF());
         System.out.println(reader.readLineCRLF());
-        System.out.println(reader.readLineCRLF());
-        System.out.println(reader.readLineCRLF());
+        System.out.println(reader.readLineCRLF());*/
         sc.close();
 
         buffer = ByteBuffer.allocate(50);
@@ -116,7 +145,7 @@ public class HTTPReader {
         System.out.println(reader.readHeader());
         sc.close();
 
-        buffer = ByteBuffer.allocate(50);
+        /*buffer = ByteBuffer.allocate(50);
         sc = SocketChannel.open();
         sc.connect(new InetSocketAddress("www.w3.org", 80));
         reader = new HTTPReader(sc, buffer);
@@ -126,9 +155,9 @@ public class HTTPReader {
         var content = reader.readBytes(header.getContentLength());
         content.flip();
         System.out.println(header.getCharset().orElse(StandardCharsets.UTF_8).decode(content));
-        sc.close();
+        sc.close();*/
 
-        buffer = ByteBuffer.allocate(50);
+        /*buffer = ByteBuffer.allocate(50);
         request = "GET / HTTP/1.1\r\n" + "Host: www.u-pem.fr\r\n" + "\r\n";
         sc = SocketChannel.open();
         sc.connect(new InetSocketAddress("www.u-pem.fr", 80));
@@ -139,6 +168,6 @@ public class HTTPReader {
         content = reader.readChunks();
         content.flip();
         System.out.println(header.getCharset().orElse(StandardCharsets.UTF_8).decode(content));
-        sc.close();
+        sc.close();*/
     }
 }
