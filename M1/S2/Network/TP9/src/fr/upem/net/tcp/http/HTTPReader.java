@@ -34,7 +34,7 @@ public class HTTPReader {
             var sb = new StringBuilder();
             var lastChar = ' ';
 
-            for (; ; ) {
+            while (true) {
                 if (!buffer.hasRemaining()) {
                     buffer.clear();
                     if (sc.read(buffer) == -1) {
@@ -70,7 +70,7 @@ public class HTTPReader {
         String line;
 
         while (!(line = readLineCRLF()).isEmpty()) {
-            var token = line.split(":");
+            var token = line.split(": ");
             fields.merge(token[0], token[1], (oldAttr, newAttr) -> oldAttr + ";" + newAttr);
         }
         return HTTPHeader.create(response, fields);
@@ -92,7 +92,7 @@ public class HTTPReader {
         try {
             var newBuffer = ByteBuffer.allocate(size);
 
-            for (; ; ) {
+            while (true) {
                 if (!buffer.hasRemaining()) {
                     buffer.clear();
                     if (sc.read(buffer) == -1) {
@@ -120,8 +120,19 @@ public class HTTPReader {
      */
 
     public ByteBuffer readChunks() throws IOException {
-        // TODO
-        return null;
+        var newBuffer = ByteBuffer.allocate(0);
+        var totalSize = 0;
+
+        while (true) {
+            var size = Integer.parseInt(readLineCRLF(), 16);
+            if (size == 0) {
+                return newBuffer;
+            }
+            var tmp = ByteBuffer.allocate(totalSize += size);
+            newBuffer.flip();
+            tmp.put(newBuffer).put(readBytes(size + 2).limit(size).flip());
+            newBuffer = tmp;
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -132,9 +143,9 @@ public class HTTPReader {
         sc.write(charsetASCII.encode(request));
         var buffer = ByteBuffer.allocate(50);
         var reader = new HTTPReader(sc, buffer);
-        /*System.out.println(reader.readLineCRLF());
         System.out.println(reader.readLineCRLF());
-        System.out.println(reader.readLineCRLF());*/
+        System.out.println(reader.readLineCRLF());
+        System.out.println(reader.readLineCRLF());
         sc.close();
 
         buffer = ByteBuffer.allocate(50);
@@ -145,7 +156,7 @@ public class HTTPReader {
         System.out.println(reader.readHeader());
         sc.close();
 
-        /*buffer = ByteBuffer.allocate(50);
+        buffer = ByteBuffer.allocate(50);
         sc = SocketChannel.open();
         sc.connect(new InetSocketAddress("www.w3.org", 80));
         reader = new HTTPReader(sc, buffer);
@@ -155,9 +166,9 @@ public class HTTPReader {
         var content = reader.readBytes(header.getContentLength());
         content.flip();
         System.out.println(header.getCharset().orElse(StandardCharsets.UTF_8).decode(content));
-        sc.close();*/
+        sc.close();
 
-        /*buffer = ByteBuffer.allocate(50);
+        buffer = ByteBuffer.allocate(50);
         request = "GET / HTTP/1.1\r\n" + "Host: www.u-pem.fr\r\n" + "\r\n";
         sc = SocketChannel.open();
         sc.connect(new InetSocketAddress("www.u-pem.fr", 80));
@@ -168,6 +179,6 @@ public class HTTPReader {
         content = reader.readChunks();
         content.flip();
         System.out.println(header.getCharset().orElse(StandardCharsets.UTF_8).decode(content));
-        sc.close();*/
+        sc.close();
     }
 }

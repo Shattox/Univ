@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 public class FakeHTTPServer {
     private final ServerSocketChannel ssc;
@@ -18,7 +19,7 @@ public class FakeHTTPServer {
         ssc.bind(null);
         var address = (InetSocketAddress) ssc.getLocalAddress();
         port = address.getPort();
-        content = ByteBuffer.wrap(s.getBytes("UTF-8"));
+        content = ByteBuffer.wrap(s.getBytes(StandardCharsets.UTF_8));
         thread = new Thread(() -> {
             SocketChannel sc = null;
             try {

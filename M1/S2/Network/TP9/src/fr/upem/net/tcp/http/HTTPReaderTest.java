@@ -25,10 +25,10 @@ public class HTTPReaderTest {
     public void testReadLineLFCR1() throws IOException {
         try {
             final String BUFFER_INITIAL_CONTENT = "Debut\rSuite\n\rFin\n\r\nANEPASTOUCHER";
-            ByteBuffer buff = ByteBuffer.wrap(BUFFER_INITIAL_CONTENT.getBytes("ASCII")).compact();
+            ByteBuffer buff = ByteBuffer.wrap(BUFFER_INITIAL_CONTENT.getBytes(StandardCharsets.US_ASCII)).compact();
             HTTPReader reader = new HTTPReader(null, buff);
             assertEquals("Debut\rSuite\n\rFin\n", reader.readLineCRLF());
-            ByteBuffer buffFinal = ByteBuffer.wrap("ANEPASTOUCHER".getBytes("ASCII")).compact();
+            ByteBuffer buffFinal = ByteBuffer.wrap("ANEPASTOUCHER".getBytes(StandardCharsets.US_ASCII)).compact();
             assertEquals(buffFinal.flip(), buff.flip());
         } catch (NullPointerException e) {
             fail("The socket must not be read until buff is entirely consumed.");
@@ -47,7 +47,7 @@ public class HTTPReaderTest {
             SocketChannel sc = SocketChannel.open();
             sc.connect(new InetSocketAddress("localhost", server.getPort()));
             var buff = ByteBuffer.allocate(12);
-            buff.put("AA\r".getBytes("ASCII"));
+            buff.put("AA\r".getBytes(StandardCharsets.US_ASCII));
             HTTPReader reader = new HTTPReader(sc, buff);
             assertEquals("AA\rLine1", reader.readLineCRLF());
             assertEquals("Line2\nLine2cont", reader.readLineCRLF());
@@ -90,7 +90,7 @@ public class HTTPReaderTest {
         ByteBuffer buff = ByteBuffer.allocate(12);
         HTTPReader reader = new HTTPReader(sc, buff);
         assertEquals("Line1", reader.readLineCRLF());
-        ByteBuffer buffFinal = ByteBuffer.wrap("€".getBytes("UTF8")).compact();
+        ByteBuffer buffFinal = ByteBuffer.wrap("€".getBytes(StandardCharsets.UTF_8)).compact();
         // Checks that the content of the buffer is the bytes of euro in UTF8
         buffFinal.flip();
         buff.flip();
@@ -109,10 +109,10 @@ public class HTTPReaderTest {
     public void testReadBytes1() throws IOException {
         try {
             final String BUFFER_INITIAL_CONTENT = "1234567890ABCDEFGH";
-            ByteBuffer buff = ByteBuffer.wrap(BUFFER_INITIAL_CONTENT.getBytes("ASCII")).compact();
+            ByteBuffer buff = ByteBuffer.wrap(BUFFER_INITIAL_CONTENT.getBytes(StandardCharsets.US_ASCII)).compact();
             HTTPReader reader = new HTTPReader(null, buff);
             assertEquals("1234567890", StandardCharsets.UTF_8.decode(reader.readBytes(10).flip()).toString());
-            ByteBuffer buffFinal = ByteBuffer.wrap("ABCDEFGH".getBytes("ASCII")).compact();
+            ByteBuffer buffFinal = ByteBuffer.wrap("ABCDEFGH".getBytes(StandardCharsets.US_ASCII)).compact();
             assertEquals(buffFinal.flip(), buff.flip());
         } catch (NullPointerException e) {
             fail("The socket must not be read until buff is entirely consumed.");
@@ -131,7 +131,7 @@ public class HTTPReaderTest {
             SocketChannel sc = SocketChannel.open();
             sc.connect(new InetSocketAddress("localhost", server.getPort()));
             var buff = ByteBuffer.allocate(12);
-            buff.put("AA\r\nB".getBytes("ASCII"));
+            buff.put("AA\r\nB".getBytes(StandardCharsets.US_ASCII));
             HTTPReader reader = new HTTPReader(sc, buff);
             assertEquals("AA\r\nBDE", StandardCharsets.US_ASCII.decode(reader.readBytes(7).flip()).toString());
         } finally {
@@ -151,7 +151,7 @@ public class HTTPReaderTest {
             SocketChannel sc = SocketChannel.open();
             sc.connect(new InetSocketAddress("localhost", server.getPort()));
             var buff = ByteBuffer.allocate(12);
-            buff.put("4\r\nWik".getBytes("ASCII"));
+            buff.put("4\r\nWik".getBytes(StandardCharsets.US_ASCII));
             HTTPReader reader = new HTTPReader(sc, buff);
             assertEquals("Wikipedia in\r\n\r\nchunks.", StandardCharsets.US_ASCII.decode(reader.readChunks().flip()).toString());
         } finally {
