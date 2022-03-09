@@ -1,0 +1,41 @@
+[Thu Feb 24 16:36:59.405425 2022] [mpm_worker:notice] [pid 7013:tid 140633556702336] AH00292: Apache/2.4.38 (Debian) configured -- resuming normal operations
+[Thu Feb 24 16:36:59.405786 2022] [core:notice] [pid 7013:tid 140633556702336] AH00094: Command line: '/home/2inf1/steve.chen/apache/bin/httpd -f /home/2inf1/steve.chen/apache/conf/httpd.conf'
+[Thu Feb 24 16:38:23.416647 2022] [cgid:error] [pid 7186:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/printenv' failed
+[Thu Feb 24 16:38:23.417806 2022] [cgid:error] [pid 7016:tid 140633452828416] [client 127.0.0.1:50312] End of script output before headers: printenv
+[Thu Feb 24 16:54:29.273065 2022] [cgid:error] [pid 8176:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/formulaire.html' failed
+[Thu Feb 24 16:54:29.287762 2022] [cgid:error] [pid 7015:tid 140633192785664] [client 127.0.0.1:50628] End of script output before headers: formulaire.html
+[Thu Feb 24 16:55:18.049242 2022] [cgid:error] [pid 8285:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/formulaire.html' failed
+[Thu Feb 24 16:55:18.050623 2022] [cgid:error] [pid 7015:tid 140633184392960] [client 127.0.0.1:50730] End of script output before headers: formulaire.html
+[Thu Feb 24 16:55:39.823787 2022] [cgid:error] [pid 7015:tid 140633176000256] [client 127.0.0.1:50740] AH01264: script not found or unable to stat: /home/2inf1/steve.chen/apache/cgi-bin/formulaire.html
+[Thu Feb 24 17:13:13.041492 2022] [cgid:error] [pid 7015:tid 140633150822144] [client 127.0.0.1:51142] AH01264: script not found or unable to stat: /home/2inf1/steve.chen/apache/cgi-bin/programme, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:17:07.369176 2022] [cgid:error] [pid 9527:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/script.pl' failed
+[Thu Feb 24 17:17:07.371747 2022] [cgid:error] [pid 7016:tid 140633310217984] [client 127.0.0.1:51230] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:17:58.536845 2022] [cgid:error] [pid 9576:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/script.pl' failed
+[Thu Feb 24 17:17:58.539347 2022] [cgid:error] [pid 7015:tid 140633427650304] [client 127.0.0.1:51250] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:19:06.630274 2022] [cgid:error] [pid 9651:tid 140633556702336] (13)Permission denied: AH01241: exec of '/home/2inf1/steve.chen/apache/cgi-bin/script.pl' failed
+[Thu Feb 24 17:19:06.632354 2022] [cgid:error] [pid 7015:tid 140632890779392] [client 127.0.0.1:51276] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:20:04.885500 2022] [http:error] [pid 7015:tid 140633419257600] [client 127.0.0.1:51298] AH02429: Response header name 'Content -Type' contains invalid characters, aborting request, referer: http://localhost:8080/formulaire.html
+"my" variable $query masks earlier declaration in same scope at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 19.
+Global symbol "$req" requires explicit package name (did you forget to declare "my $req"?) at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 23.
+Execution of /home/2inf1/steve.chen/apache/cgi-bin/script.pl aborted due to compilation errors.
+[Thu Feb 24 17:27:59.195832 2022] [cgid:error] [pid 7015:tid 140631976433408] [client 127.0.0.1:51484] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+"my" variable $query masks earlier declaration in same scope at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 19.
+[Thu Feb 24 17:28:33.749280 2022] [cgid:error] [pid 7015:tid 140631993218816] [client 127.0.0.1:51498] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:28:50.460287 2022] [cgid:error] [pid 7015:tid 140631968040704] [client 127.0.0.1:51508] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:30:31.286412 2022] [cgid:error] [pid 7015:tid 140631984826112] [client 127.0.0.1:51542] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 17:31:32.677554 2022] [cgid:error] [pid 7015:tid 140633461221120] [client 127.0.0.1:51562] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+Useless use of concatenation (.) or string in void context at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 36.
+Use of uninitialized value $_ in print at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 36.
+[Thu Feb 24 17:34:44.034828 2022] [http:error] [pid 7015:tid 140633452828416] [client 127.0.0.1:51612] AH02429: Response header name 'Content -Type' contains invalid characters, aborting request, referer: http://localhost:8080/formulaire.html
+Useless use of concatenation (.) or string in void context at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 36.
+Use of uninitialized value $_ in print at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 36.
+syntax error at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 37, near ") {"
+Execution of /home/2inf1/steve.chen/apache/cgi-bin/script.pl aborted due to compilation errors.
+[Thu Feb 24 17:39:45.539187 2022] [cgid:error] [pid 7016:tid 140632790132480] [client 127.0.0.1:51736] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+syntax error at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 38, near ") {"
+Execution of /home/2inf1/steve.chen/apache/cgi-bin/script.pl aborted due to compilation errors.
+[Thu Feb 24 17:41:41.008767 2022] [cgid:error] [pid 7016:tid 140632781739776] [client 127.0.0.1:51778] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+syntax error at /home/2inf1/steve.chen/apache/cgi-bin/script.pl line 38, near ") {"
+Execution of /home/2inf1/steve.chen/apache/cgi-bin/script.pl aborted due to compilation errors.
+[Thu Feb 24 17:42:18.320448 2022] [cgid:error] [pid 7016:tid 140632773347072] [client 127.0.0.1:51792] End of script output before headers: script.pl, referer: http://localhost:8080/formulaire.html
+[Thu Feb 24 18:14:30.033956 2022] [mpm_worker:notice] [pid 7013:tid 140633556702336] AH00295: caught SIGTERM, shutting down
