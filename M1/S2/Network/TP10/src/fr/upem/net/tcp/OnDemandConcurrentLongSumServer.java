@@ -6,13 +6,11 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class OnDemandConcurrentLongSumServer {
     private static final Logger logger = Logger.getLogger(OnDemandConcurrentLongSumServer.class.getName());
-    private static final int BUFFER_SIZE = 1024;
     private final ServerSocketChannel serverSocketChannel;
 
     public OnDemandConcurrentLongSumServer(int port) throws IOException {
@@ -27,7 +25,7 @@ public class OnDemandConcurrentLongSumServer {
      * @throws IOException
      */
 
-    public void launch() throws IOException, InterruptedException {
+    public void launch() throws IOException {
         logger.info("Server started");
         while (!Thread.interrupted()) {
             SocketChannel client = serverSocketChannel.accept();
