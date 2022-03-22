@@ -3,7 +3,7 @@ package fr.upem.net.tcp.nonblocking;
 import java.nio.ByteBuffer;
 
 public class MessageReader implements Reader<MessageReader.Message> {
-    public static record Message(String login, String text) {
+    public record Message(String login, String text) {
     }
     private final StringReader stringReader = new StringReader();
     private Message message;
@@ -26,5 +26,6 @@ public class MessageReader implements Reader<MessageReader.Message> {
 
     @Override
     public void reset() {
+        stringReader.reset();
     }
 }

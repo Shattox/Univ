@@ -17,7 +17,7 @@ public class Chaton {
         private final SocketChannel sc;
         private final ByteBuffer bufferIn = ByteBuffer.allocate(BUFFER_SIZE);
         private final ByteBuffer bufferOut = ByteBuffer.allocate(BUFFER_SIZE);
-        private final ArrayDeque<String> queue = new ArrayDeque<>();
+        private final ArrayDeque<MessageReader.Message> queue = new ArrayDeque<>();
         private final MessageReader messageReader;
         private final Charset charset = StandardCharsets.UTF_8;
         private final Chaton server; // we could also have Context as an instance class, which would naturally
@@ -43,9 +43,8 @@ public class Chaton {
                 return;
             }
             messageReader.process(bufferIn);
-            var message = messageReader.get();
-            server.broadcast(message.text());
-            bufferIn.compact();
+            server.broadcast(messageReader.get());
+            messageReader.reset();
         }
 
         /**
@@ -53,7 +52,7 @@ public class Chaton {
          *
          * @param msg message
          */
-        public void queueMessage(String msg) {
+        public void queueMessage(MessageReader.Message msg) {
             queue.add(msg);
             processOut();
             updateInterestOps();
@@ -71,7 +70,12 @@ public class Chaton {
             if (message == null) {
                 return;
             }
-            bufferOut.put(charset.encode(message));
+            var login = message.login();
+            var text = message.text();
+            bufferOut.putInt(login.length())
+                    .put(charset.encode(login))
+                    .putInt(text.length())
+                    .put(charset.encode(text));
         }
 
         /**
@@ -212,7 +216,7 @@ public class Chaton {
      *
      * @param msg message
      */
-    private void broadcast(String msg) {
+    private void broadcast(MessageReader.Message msg) {
         // TODO
         for (var key: selector.keys()) {
             var context = (Context) key.attachment();
