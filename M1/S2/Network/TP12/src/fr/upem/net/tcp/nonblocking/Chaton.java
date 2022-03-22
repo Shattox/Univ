@@ -42,7 +42,10 @@ public class Chaton {
             if (bufferIn.position() < Integer.BYTES) {
                 return;
             }
-            messageReader.process(bufferIn);
+            var status = messageReader.process(bufferIn);
+            while (status == Reader.ProcessStatus.REFILL) {
+                status = messageReader.process(bufferIn);
+            }
             server.broadcast(messageReader.get());
             messageReader.reset();
         }
