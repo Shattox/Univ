@@ -16,6 +16,9 @@ public class MessageReader implements Reader<MessageReader.Message> {
 
     @Override
     public ProcessStatus process(ByteBuffer bb) {
+        if (state == State.DONE || state == State.ERROR) {
+            throw new IllegalStateException();
+        }
         var processStatus = stringReader.process(bb);
         if (processStatus != ProcessStatus.DONE) {
             return processStatus;
