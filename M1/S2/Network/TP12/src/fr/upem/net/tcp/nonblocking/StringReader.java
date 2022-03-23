@@ -11,10 +11,8 @@ public class StringReader implements Reader<String> {
 
     private final static int BUFFER_SIZE = 1024;
 
-    private State state = State.WAITING;
-    private State stateSize = State.WAITING_SIZE;
+    private State state = State.WAITING_SIZE;
     private final ByteBuffer internalBuffer = ByteBuffer.allocate(BUFFER_SIZE); // write-mode
-    private final ByteBuffer sizeBuffer = ByteBuffer.allocate(Integer.BYTES);
     private final Charset charset = StandardCharsets.UTF_8;
     private final IntReader intReader = new IntReader();
     private String message;
@@ -24,17 +22,15 @@ public class StringReader implements Reader<String> {
         if (state == State.DONE || state == State.ERROR) {
             throw new IllegalStateException();
         }
-        try {
-            if (stateSize == State.WAITING_SIZE) {
-                var status = intReader.process(buffer);
-                buffer.flip();
-                if (status != ProcessStatus.DONE) {
-                    return ProcessStatus.REFILL;
-                }
-                stateSize = State.DONE;
-            } else {
-                buffer.flip();
+        if (state == State.WAITING_SIZE) {
+            var status = intReader.process(buffer);
+            if (status != ProcessStatus.DONE) {
+                return status;
             }
+            state = State.WAITING;
+        }
+        try {
+            buffer.flip();
             var msgSize = intReader.get();
             if (msgSize < 0 || msgSize > 1024) {
                 return ProcessStatus.ERROR;
@@ -64,10 +60,8 @@ public class StringReader implements Reader<String> {
 
     @Override
     public void reset() {
-        state = State.WAITING;
-        stateSize = State.WAITING_SIZE;
+        state = State.WAITING_SIZE;
         intReader.reset();
         internalBuffer.clear();
-        sizeBuffer.clear();
     }
 }
