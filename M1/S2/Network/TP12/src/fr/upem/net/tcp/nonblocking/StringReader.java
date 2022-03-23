@@ -6,15 +6,17 @@ import java.nio.charset.StandardCharsets;
 
 public class StringReader implements Reader<String> {
     private enum State {
-        DONE, WAITING, ERROR
+        DONE, WAITING, ERROR, WAITING_SIZE
     }
 
     private final static int BUFFER_SIZE = 1024;
 
     private State state = State.WAITING;
+    private State stateSize = State.WAITING_SIZE;
     private final ByteBuffer internalBuffer = ByteBuffer.allocate(BUFFER_SIZE); // write-mode
     private final ByteBuffer sizeBuffer = ByteBuffer.allocate(Integer.BYTES);
     private final Charset charset = StandardCharsets.UTF_8;
+    private final IntReader intReader = new IntReader();
     private String message;
 
     @Override
@@ -22,16 +24,18 @@ public class StringReader implements Reader<String> {
         if (state == State.DONE || state == State.ERROR) {
             throw new IllegalStateException();
         }
-        buffer.flip();
         try {
-            while (buffer.hasRemaining() && sizeBuffer.hasRemaining()) {
-                sizeBuffer.put(buffer.get());
+            if (stateSize == State.WAITING_SIZE) {
+                var status = intReader.process(buffer);
+                buffer.flip();
+                if (status != ProcessStatus.DONE) {
+                    return ProcessStatus.REFILL;
+                }
+                stateSize = State.DONE;
+            } else {
+                buffer.flip();
             }
-            if (sizeBuffer.position() != 4) {
-                return ProcessStatus.REFILL;
-            }
-            sizeBuffer.flip();
-            var msgSize = sizeBuffer.getInt();
+            var msgSize = intReader.get();
             if (msgSize < 0 || msgSize > 1024) {
                 return ProcessStatus.ERROR;
             }
@@ -61,6 +65,8 @@ public class StringReader implements Reader<String> {
     @Override
     public void reset() {
         state = State.WAITING;
+        stateSize = State.WAITING_SIZE;
+        intReader.reset();
         internalBuffer.clear();
         sizeBuffer.clear();
     }

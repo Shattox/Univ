@@ -76,9 +76,9 @@ public class Chaton {
             }
             var login = message.login();
             var text = message.text();
-            bufferOut.putInt(login.length())
+            bufferOut.putInt(charset.encode(login).remaining())
                     .put(charset.encode(login))
-                    .putInt(text.length())
+                    .putInt(charset.encode(text).remaining())
                     .put(charset.encode(text));
         }
 
