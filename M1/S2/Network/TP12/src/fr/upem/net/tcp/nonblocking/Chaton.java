@@ -43,10 +43,11 @@ public class Chaton {
                 return;
             }
             var status = messageReader.process(bufferIn);
-            while (status == Reader.ProcessStatus.REFILL) {
+            while (status != Reader.ProcessStatus.DONE) {
                 status = messageReader.process(bufferIn);
             }
-            server.broadcast(messageReader.get());
+            var msg = messageReader.get();
+            server.broadcast(msg);
             messageReader.reset();
         }
 
@@ -95,7 +96,7 @@ public class Chaton {
                 silentlyClose();
                 return;
             }
-            if (bufferOut.position() != 0 || !queue.isEmpty()) {
+            if (bufferOut.position() != 0) {
                 key.interestOps(SelectionKey.OP_WRITE);
                 return;
             }
@@ -120,6 +121,7 @@ public class Chaton {
          */
         private void doRead() throws IOException {
             if (sc.read(bufferIn) == -1) {
+                System.out.println("la");
                 closed = true;
                 key.cancel();
             }

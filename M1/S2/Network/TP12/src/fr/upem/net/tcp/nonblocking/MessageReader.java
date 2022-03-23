@@ -16,14 +16,16 @@ public class MessageReader implements Reader<MessageReader.Message> {
 
     @Override
     public ProcessStatus process(ByteBuffer bb) {
-
         var processStatus = stringReader.process(bb);
         if (processStatus != ProcessStatus.DONE) {
             return processStatus;
         }
         var login = stringReader.get();
         stringReader.reset();
-        stringReader.process(bb);
+        processStatus = stringReader.process(bb);
+        if (processStatus != ProcessStatus.DONE) {
+            return processStatus;
+        }
         var text = stringReader.get();
         message = new Message(login, text);
         state = State.DONE;
