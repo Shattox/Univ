@@ -7,31 +7,33 @@ public class MessageReader implements Reader<MessageReader.Message> {
     }
 
     private enum State {
-        DONE, WAITING, ERROR
+        DONE, ERROR, WAITING_LOGIN, WAITING_TEXT
     }
 
     private final StringReader stringReader = new StringReader();
-    private State state = State.WAITING;
+    private State state = State.WAITING_LOGIN;
     private Message message;
 
     @Override
-    public ProcessStatus process(ByteBuffer bb) {
+    public ProcessStatus process(ByteBuffer buffer) {
         if (state == State.DONE || state == State.ERROR) {
             throw new IllegalStateException();
         }
-        var processStatus = stringReader.process(bb);
-        if (processStatus != ProcessStatus.DONE) {
-            return processStatus;
+        // Process login
+        var subProcessStatus = subProcess(buffer, State.WAITING_LOGIN, State.WAITING_TEXT);
+        if (subProcessStatus != ProcessStatus.DONE) {
+            return subProcessStatus;
         }
         var login = stringReader.get();
         stringReader.reset();
-        processStatus = stringReader.process(bb);
-        if (processStatus != ProcessStatus.DONE) {
-            return processStatus;
+        // Process text
+        subProcessStatus = subProcess(buffer, State.WAITING_TEXT, State.DONE);
+        if (subProcessStatus != ProcessStatus.DONE) {
+            return subProcessStatus;
         }
         var text = stringReader.get();
+        stringReader.reset();
         message = new Message(login, text);
-        state = State.DONE;
         return ProcessStatus.DONE;
     }
 
@@ -45,7 +47,18 @@ public class MessageReader implements Reader<MessageReader.Message> {
 
     @Override
     public void reset() {
-        state = State.WAITING;
+        state = State.WAITING_LOGIN;
         stringReader.reset();
+    }
+
+    private ProcessStatus subProcess(ByteBuffer buffer, State expectedState, State nextState) {
+        if (state == expectedState) {
+            var processStatus = stringReader.process(buffer);
+            if (processStatus != ProcessStatus.DONE) {
+                return processStatus;
+            }
+            state = nextState;
+        }
+        return ProcessStatus.DONE;
     }
 }
