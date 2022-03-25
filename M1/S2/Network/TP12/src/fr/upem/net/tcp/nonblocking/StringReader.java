@@ -4,6 +4,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static java.lang.Math.min;
+
 public class StringReader implements Reader<String> {
     private enum State {
         DONE, WAITING, ERROR, WAITING_SIZE
@@ -35,9 +37,8 @@ public class StringReader implements Reader<String> {
             if (msgSize < 0 || msgSize > 1024) {
                 return ProcessStatus.ERROR;
             }
-            while (buffer.hasRemaining() && internalBuffer.hasRemaining() && internalBuffer.position() < msgSize) {
-                internalBuffer.put(buffer.get());
-            }
+            internalBuffer.put(buffer.slice(buffer.position(), min(buffer.limit(), msgSize)));
+            buffer.position(buffer.position() + min(buffer.limit(), msgSize));
             if (internalBuffer.position() < msgSize) {
                 return ProcessStatus.REFILL;
             }
