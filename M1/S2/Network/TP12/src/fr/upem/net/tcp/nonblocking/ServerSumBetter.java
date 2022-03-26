@@ -30,13 +30,11 @@ public class ServerSumBetter {
 
         private void process() {
             // TODO
-            if (bufferIn.position() >= 2 * Integer.BYTES) {
-                bufferIn.flip();
-                while (bufferIn.hasRemaining()) {
-                    bufferOut.putInt(bufferIn.getInt() + bufferIn.getInt());
-                }
-                bufferIn.compact();
+            bufferIn.flip();
+            while (bufferIn.remaining() >= 2 * Integer.BYTES && bufferOut.remaining() >= Integer.BYTES) {
+                bufferOut.putInt(bufferIn.getInt() + bufferIn.getInt());
             }
+            bufferIn.compact();
         }
 
         /**
@@ -50,15 +48,19 @@ public class ServerSumBetter {
 
         private void updateInterestOps() {
             // TODO
-            if (bufferIn.position() == 0 && closed) {
+            var interestOps = 0;
+
+            if (!closed && bufferIn.hasRemaining()) {
+                interestOps |= SelectionKey.OP_READ;
+            }
+            if (bufferOut.position() != 0) {
+                interestOps |= SelectionKey.OP_WRITE;
+            }
+            if (interestOps == 0) {
                 silentlyClose();
                 return;
             }
-            if (bufferOut.position() >= Integer.BYTES) {
-                key.interestOps(SelectionKey.OP_WRITE);
-                return;
-            }
-            key.interestOps(SelectionKey.OP_READ);
+            key.interestOps(interestOps);
         }
 
         private void silentlyClose() {
@@ -101,6 +103,7 @@ public class ServerSumBetter {
             bufferOut.flip();
             sc.write(bufferOut);
             bufferOut.compact();
+            process();
             updateInterestOps();
         }
     }

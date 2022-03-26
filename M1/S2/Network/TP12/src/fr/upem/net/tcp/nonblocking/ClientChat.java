@@ -4,100 +4,60 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.Channel;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Chaton {
+import fr.upem.net.tcp.nonblocking.MessageReader.Message;
 
-    /*static private class ServerEchoWithConsole {
-        private final Thread console;
-
-        public ServerEchoWithConsole() {
-            this.console = new Thread(this::consoleRun);
-        }
-
-        public void sendCommand(String line) throws InterruptedException {
-            Objects.requireNonNull(line);
-            bQueue.put(line.toUpperCase());
-        }
-
-        public void processCommand() {
-            var line = bQueue.poll();
-
-            switch (Objects.requireNonNull(line)) {
-                case "INFO" -> {
-                }
-                case "SHUTDOWN" -> {
-                }
-                case "SHUTDOWNNOW" -> {
-                }
-                default -> System.out.println("Unknown command please retry !");
-            }
-        }
-
-        public void consoleRun() {
-            try {
-                try (var scanner = new Scanner(System.in)) {
-                    while (scanner.hasNextLine()) {
-                        var line = scanner.nextLine();
-                        sendCommand(line);
-                    }
-                }
-                logger.info("Console thread stopping");
-            } catch (InterruptedException e) {
-                logger.info("Console thread has been interrupted");
-            }
-        }
-    }*/
+public class ClientChat {
 
     static private class Context {
         private final SelectionKey key;
         private final SocketChannel sc;
         private final ByteBuffer bufferIn = ByteBuffer.allocate(BUFFER_SIZE);
         private final ByteBuffer bufferOut = ByteBuffer.allocate(BUFFER_SIZE);
-        private final ArrayDeque<MessageReader.Message> queue = new ArrayDeque<>();
+        private final ArrayDeque<Message> queue = new ArrayDeque<>();
         private final MessageReader messageReader = new MessageReader();
-        private final Charset charset = StandardCharsets.UTF_8;
-        private final Chaton server; // we could also have Context as an instance class, which would naturally
-        // give access to ServerChatInt.this
         private boolean closed = false;
 
-        private Context(Chaton server, SelectionKey key) {
+        private Context(SelectionKey key) {
             this.key = key;
             this.sc = (SocketChannel) key.channel();
-            this.server = server;
         }
 
         /**
          * Process the content of bufferIn
-         *
-         * The convention is that bufferIn is in write-mode before the call to process and
-         * after the call
-         *
+         * <p>
+         * The convention is that bufferIn is in write-mode before the call to process
+         * and after the call
          */
         private void processIn() {
+            // TODO
             var status = messageReader.process(bufferIn);
             if (status != Reader.ProcessStatus.DONE) {
                 return;
             }
             var msg = messageReader.get();
-            server.broadcast(msg);
             messageReader.reset();
+            System.out.println(msg.login() + " : " + msg.text());
         }
 
         /**
          * Add a message to the message queue, tries to fill bufferOut and updateInterestOps
          *
-         * @param msg message
+         * @param msg msg
          */
-        public void queueMessage(MessageReader.Message msg) {
+        private void queueMessage(Message msg) {
+            // TODO
             queue.add(msg);
             processOut();
             updateInterestOps();
@@ -105,9 +65,9 @@ public class Chaton {
 
         /**
          * Try to fill bufferOut from the message queue
-         *
          */
         private void processOut() {
+            // TODO
             var message = queue.peek();
             if (message == null) {
                 return;
@@ -127,12 +87,11 @@ public class Chaton {
         /**
          * Update the interestOps of the key looking only at values of the boolean
          * closed and of both ByteBuffers.
-         *
+         * <p>
          * The convention is that both buffers are in write-mode before the call to
          * updateInterestOps and after the call. Also, it is assumed that process has
          * been called just before updateInterestOps.
          */
-
         private void updateInterestOps() {
             var interestOps = 0;
 
@@ -159,23 +118,24 @@ public class Chaton {
 
         /**
          * Performs the read action on sc
-         *
+         * <p>
          * The convention is that both buffers are in write-mode before the call to
          * doRead and after the call
          *
          * @throws IOException IOException
          */
         private void doRead() throws IOException {
+            // TODO
             if (sc.read(bufferIn) == -1) {
                 closed = true;
-                key.cancel();
             }
             processIn();
+            updateInterestOps();
         }
 
         /**
          * Performs the write action on sc
-         *
+         * <p>
          * The convention is that both buffers are in write-mode before the call to
          * doWrite and after the call
          *
@@ -183,6 +143,7 @@ public class Chaton {
          */
 
         private void doWrite() throws IOException {
+            // TODO
             bufferOut.flip();
             sc.write(bufferOut);
             bufferOut.compact();
@@ -190,71 +151,111 @@ public class Chaton {
             updateInterestOps();
         }
 
+        public void doConnect() throws IOException {
+            // TODO
+            if (!sc.finishConnect()) {
+                return;
+            }
+            key.interestOps(SelectionKey.OP_READ);
+        }
     }
 
-    private static final int BUFFER_SIZE = 1_024;
-    private static final Logger logger = Logger.getLogger(ServerChatInt.class.getName());
-    private static final ArrayBlockingQueue<String> bQueue = new ArrayBlockingQueue<>(1);
+    static private final int BUFFER_SIZE = 10_000;
+    static private final Logger logger = Logger.getLogger(ClientChat.class.getName());
+    static private final Charset charset = StandardCharsets.UTF_8;
 
-    private final ServerSocketChannel serverSocketChannel;
+    private final SocketChannel sc;
     private final Selector selector;
-    /*private final ServerEchoWithConsole serverEchoWithConsole;*/
+    private final InetSocketAddress serverAddress;
+    private final String login;
+    private final Thread console;
+    private Context uniqueContext;
+    private final ArrayBlockingQueue<String> bQueue = new ArrayBlockingQueue<>(1024);
 
-    public Chaton(int port) throws IOException {
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress(port));
-        selector = Selector.open();
-        /*this.serverEchoWithConsole = new ServerEchoWithConsole();*/
+    public ClientChat(String login, InetSocketAddress serverAddress) throws IOException {
+        this.serverAddress = serverAddress;
+        this.login = login;
+        this.sc = SocketChannel.open();
+        this.selector = Selector.open();
+        this.console = new Thread(this::consoleRun);
+    }
+
+    private void consoleRun() {
+        try {
+            try (var scanner = new Scanner(System.in)) {
+                while (scanner.hasNextLine()) {
+                    var msg = scanner.nextLine();
+                    sendCommand(msg);
+                }
+            }
+            logger.info("Console thread stopping");
+        } catch (InterruptedException e) {
+            logger.info("Console thread has been interrupted");
+        }
+    }
+
+    /**
+     * Send instructions to the selector via a BlockingQueue and wake it up
+     *
+     * @param msg msg
+     */
+    private void sendCommand(String msg) throws InterruptedException {
+        // TODO
+        synchronized (bQueue) {
+            Objects.requireNonNull(msg);
+            bQueue.put(msg);
+            selector.wakeup();
+        }
+    }
+
+    /**
+     * Processes the command from the BlockingQueue
+     */
+    private void processCommands() {
+        // TODO
+        synchronized (bQueue) {
+            var message = bQueue.poll();
+            if (message == null) {
+                return;
+            }
+            uniqueContext.queueMessage(new Message(login, message));
+        }
     }
 
     public void launch() throws IOException {
-        serverSocketChannel.configureBlocking(false);
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        sc.configureBlocking(false);
+        var key = sc.register(selector, SelectionKey.OP_CONNECT);
+        uniqueContext = new Context(key);
+        key.attach(uniqueContext);
+        sc.connect(serverAddress);
+
+        console.start();
+
         while (!Thread.interrupted()) {
-            Helpers.printKeys(selector); // for debug
-            System.out.println("Starting select");
             try {
                 selector.select(this::treatKey);
-                /*serverEchoWithConsole.processCommand();*/
+                processCommands();
             } catch (UncheckedIOException tunneled) {
                 throw tunneled.getCause();
             }
-            System.out.println("Select finished");
         }
     }
 
     private void treatKey(SelectionKey key) {
-        Helpers.printSelectedKey(key); // for debug
         try {
-            if (key.isValid() && key.isAcceptable()) {
-                doAccept(key);
+            if (key.isValid() && key.isConnectable()) {
+                uniqueContext.doConnect();
+            }
+            if (key.isValid() && key.isWritable()) {
+                uniqueContext.doWrite();
+            }
+            if (key.isValid() && key.isReadable()) {
+                uniqueContext.doRead();
             }
         } catch (IOException ioe) {
             // lambda call in select requires to tunnel IOException
             throw new UncheckedIOException(ioe);
         }
-        try {
-            if (key.isValid() && key.isWritable()) {
-                ((Context) key.attachment()).doWrite();
-            }
-            if (key.isValid() && key.isReadable()) {
-                ((Context) key.attachment()).doRead();
-            }
-        } catch (IOException e) {
-            logger.log(Level.INFO, "Connection closed with client due to IOException", e);
-            silentlyClose(key);
-        }
-    }
-
-    private void doAccept(SelectionKey key) throws IOException {
-        // TODO
-        var sc = serverSocketChannel.accept();
-        if (sc == null) {
-            return;
-        }
-        sc.configureBlocking(false);
-        var client = sc.register(selector, SelectionKey.OP_READ);
-        client.attach(new Context(this, client));
     }
 
     private void silentlyClose(SelectionKey key) {
@@ -266,30 +267,15 @@ public class Chaton {
         }
     }
 
-    /**
-     * Add a message to all connected clients queue
-     *
-     * @param msg message
-     */
-    private void broadcast(MessageReader.Message msg) {
-        // TODO
-        for (var key: selector.keys()) {
-            var context = (Context) key.attachment();
-            if (context != null) {
-                context.queueMessage(msg);
-            }
-        }
-    }
-
     public static void main(String[] args) throws NumberFormatException, IOException {
-        if (args.length != 1) {
+        if (args.length != 3) {
             usage();
             return;
         }
-        new Chaton(Integer.parseInt(args[0])).launch();
+        new ClientChat(args[0], new InetSocketAddress(args[1], Integer.parseInt(args[2]))).launch();
     }
 
     private static void usage() {
-        System.out.println("Usage : ServerSumBetter port");
+        System.out.println("Usage : ClientChat login hostname port");
     }
 }

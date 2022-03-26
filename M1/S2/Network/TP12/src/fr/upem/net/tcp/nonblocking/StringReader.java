@@ -36,6 +36,7 @@ public class StringReader implements Reader<String> {
                 return ProcessStatus.ERROR;
             }
             while (buffer.hasRemaining() && internalBuffer.hasRemaining() && internalBuffer.position() < msgSize) {
+                // put directly buffer in internalBuffer
                 internalBuffer.put(buffer.get());
             }
             if (internalBuffer.position() < msgSize) {
