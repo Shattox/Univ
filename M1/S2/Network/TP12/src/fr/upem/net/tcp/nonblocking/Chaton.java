@@ -204,6 +204,7 @@ public class Chaton {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(port));
         selector = Selector.open();
+        System.out.println(serverSocketChannel.socket().getInetAddress().getHostName());
         /*this.serverEchoWithConsole = new ServerEchoWithConsole();*/
     }
 
