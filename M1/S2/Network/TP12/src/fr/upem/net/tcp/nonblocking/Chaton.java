@@ -8,55 +8,11 @@ import java.nio.channels.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
-import java.util.Objects;
-import java.util.Scanner;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Chaton {
-
-    /*static private class ServerEchoWithConsole {
-        private final Thread console;
-
-        public ServerEchoWithConsole() {
-            this.console = new Thread(this::consoleRun);
-        }
-
-        public void sendCommand(String line) throws InterruptedException {
-            Objects.requireNonNull(line);
-            bQueue.put(line.toUpperCase());
-        }
-
-        public void processCommand() {
-            var line = bQueue.poll();
-
-            switch (Objects.requireNonNull(line)) {
-                case "INFO" -> {
-                }
-                case "SHUTDOWN" -> {
-                }
-                case "SHUTDOWNNOW" -> {
-                }
-                default -> System.out.println("Unknown command please retry !");
-            }
-        }
-
-        public void consoleRun() {
-            try {
-                try (var scanner = new Scanner(System.in)) {
-                    while (scanner.hasNextLine()) {
-                        var line = scanner.nextLine();
-                        sendCommand(line);
-                    }
-                }
-                logger.info("Console thread stopping");
-            } catch (InterruptedException e) {
-                logger.info("Console thread has been interrupted");
-            }
-        }
-    }*/
-
     static private class Context {
         private final SelectionKey key;
         private final SocketChannel sc;
@@ -198,14 +154,12 @@ public class Chaton {
 
     private final ServerSocketChannel serverSocketChannel;
     private final Selector selector;
-    /*private final ServerEchoWithConsole serverEchoWithConsole;*/
 
     public Chaton(int port) throws IOException {
         serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(port));
         selector = Selector.open();
         System.out.println(serverSocketChannel.socket().getInetAddress().getHostName());
-        /*this.serverEchoWithConsole = new ServerEchoWithConsole();*/
     }
 
     public void launch() throws IOException {
@@ -216,7 +170,6 @@ public class Chaton {
             System.out.println("Starting select");
             try {
                 selector.select(this::treatKey);
-                /*serverEchoWithConsole.processCommand();*/
             } catch (UncheckedIOException tunneled) {
                 throw tunneled.getCause();
             }
